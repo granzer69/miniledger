@@ -1,0 +1,17 @@
+{
+  "name": "miniledger",
+  "private": true,
+  "description": "Track money lent to friends.",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "dev:api": "npm run dev --prefix backend",
+    "test": "npm test --prefix backend && npm test --prefix mobile",
+    "test:api": "npm test --prefix backend",
+    "test:mobile": "npm test --prefix mobile",
+    "typecheck": "npm run typecheck --prefix backend"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
