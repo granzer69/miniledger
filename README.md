@@ -84,7 +84,7 @@ A loan is overdue when it has not been repaid and its due date is before today i
 
 Receipts are optional JPEG, PNG, or WebP images up to 5 MB. The file is checked against its image header and is only returned to the user who owns the loan.
 
-## Record a demo
+## What's in the Demo
 
 About two minutes, on a phone-width window:
 
