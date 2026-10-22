@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { dateToIso, formatDisplayDate, parseIsoDate } from "../lib/dates";
-import { colors } from "../theme";
+import { colors, inputStyle } from "../theme";
 
 type DateFieldProps = {
   value: string;
@@ -52,13 +52,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   input: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
+    ...inputStyle,
     justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 14,
   },
   value: {
     color: colors.ink,

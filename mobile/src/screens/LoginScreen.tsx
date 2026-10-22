@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { ApiError, requestOtp, verifyOtp } from "../lib/api";
-import { normalizeIndianPhone, phoneDigits } from "../lib/phone";
-import { colors, displayFont } from "../theme";
 import { useAuth } from "../auth/AuthContext";
+import { Button } from "../components/Button";
+import { ApiError, requestOtp, verifyOtp } from "../lib/api";
+import { formatPhone, normalizeIndianPhone, phoneDigits } from "../lib/phone";
+import { colors, displayFont, inputStyle } from "../theme";
 
 export function LoginScreen() {
   const { signIn } = useAuth();
@@ -53,8 +54,9 @@ export function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.screen}>
       <View style={styles.copy}>
+        <Text style={styles.eyebrow}>Personal ledger</Text>
         <Text style={styles.mark}>MiniLedger</Text>
-        <Text style={styles.lede}>Track money you've lent to friends, and notice what is overdue.</Text>
+        <Text style={styles.lede}>Money you lend to friends, with the overdue amounts kept in sight.</Text>
       </View>
 
       {step === "phone" ? (
@@ -62,51 +64,70 @@ export function LoginScreen() {
           <Text style={styles.label}>Mobile number</Text>
           <View style={styles.phoneRow}>
             <Text style={styles.prefix}>+91</Text>
+            <View style={styles.divider} />
             <TextInput
               accessibilityLabel="Mobile number"
               keyboardType="phone-pad"
-              onChangeText={(value) => setPhone(phoneDigits(value))}
+              onChangeText={(value) => {
+                setPhone(phoneDigits(value));
+                setError(null);
+              }}
               placeholder="98765 43210"
-              placeholderTextColor="#A39B90"
+              placeholderTextColor={colors.faint}
               style={styles.phoneInput}
               value={phone}
             />
           </View>
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Pressable accessibilityRole="button" disabled={submitting} onPress={() => void sendCode()} style={styles.button}>
-            <Text style={styles.buttonText}>{submitting ? "Sending…" : "Send code"}</Text>
-          </Pressable>
+          {error ? <Text accessibilityLiveRegion="polite" style={styles.error}>{error}</Text> : null}
+          <Button disabled={submitting} label={submitting ? "Sending…" : "Send code"} onPress={() => void sendCode()} />
         </View>
       ) : (
         <View style={styles.form}>
           <Text style={styles.label}>One-time code</Text>
           <Text style={styles.hint}>
-            A code for +91 {phone} was printed in the API server log. It is not shown here.
+            The code for {normalized ? formatPhone(normalized) : phone} is in the API server log. It is not shown here.
           </Text>
           <TextInput
             accessibilityLabel="One-time code"
             keyboardType="number-pad"
             maxLength={6}
-            onChangeText={(value) => setCode(value.replace(/\D/g, "").slice(0, 6))}
+            onChangeText={(value) => {
+              setCode(value.replace(/\D/g, "").slice(0, 6));
+              setError(null);
+            }}
             placeholder="000000"
-            placeholderTextColor="#A39B90"
+            placeholderTextColor={colors.faint}
             style={styles.codeInput}
             value={code}
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Pressable accessibilityRole="button" disabled={submitting} onPress={() => void verify()} style={styles.button}>
-            <Text style={styles.buttonText}>{submitting ? "Checking…" : "Continue"}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setCode("");
-              setError(null);
-              void sendCode();
-            }}
-          >
-            <Text style={styles.link}>Resend code</Text>
-          </Pressable>
+          {error ? <Text accessibilityLiveRegion="polite" style={styles.error}>{error}</Text> : null}
+          <Button disabled={submitting} label={submitting ? "Checking…" : "Continue"} onPress={() => void verify()} />
+          <View style={styles.links}>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => {
+                setCode("");
+                setError(null);
+                void sendCode();
+              }}
+              style={styles.linkHit}
+            >
+              <Text style={styles.link}>Resend code</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => {
+                setStep("phone");
+                setCode("");
+                setError(null);
+              }}
+              style={styles.linkHit}
+            >
+              <Text style={styles.linkMuted}>Change number</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </KeyboardAvoidingView>
@@ -117,31 +138,41 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
   },
   copy: {
-    marginBottom: 28,
+    marginBottom: 32,
+  },
+  eyebrow: {
+    color: colors.green,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginBottom: 8,
+    textTransform: "uppercase",
   },
   mark: {
     color: colors.ink,
     fontFamily: displayFont,
-    fontSize: 42,
-    lineHeight: 48,
+    fontSize: 46,
+    lineHeight: 52,
   },
   lede: {
     color: colors.muted,
     fontSize: 17,
-    lineHeight: 24,
-    marginTop: 10,
+    lineHeight: 25,
+    marginTop: 12,
+    maxWidth: 340,
   },
   form: {
     gap: 12,
   },
   label: {
     color: colors.muted,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 0.4,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   phoneRow: {
@@ -158,7 +189,12 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontSize: 18,
     fontWeight: "700",
-    marginRight: 10,
+  },
+  divider: {
+    backgroundColor: colors.line,
+    height: 22,
+    marginHorizontal: 12,
+    width: 1,
   },
   phoneInput: {
     color: colors.ink,
@@ -167,43 +203,38 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   codeInput: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderRadius: 14,
-    borderWidth: 1,
-    color: colors.ink,
+    ...inputStyle,
     fontFamily: displayFont,
     fontSize: 32,
     letterSpacing: 8,
-    minHeight: 64,
-    paddingHorizontal: 14,
+    minHeight: 68,
     textAlign: "center",
   },
   hint: {
     color: colors.muted,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
   },
   error: {
     color: colors.overdue,
     fontSize: 14,
+    lineHeight: 20,
   },
-  button: {
+  links: {
     alignItems: "center",
-    backgroundColor: colors.green,
-    borderRadius: 14,
-    justifyContent: "center",
-    marginTop: 4,
-    minHeight: 52,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  buttonText: {
-    color: colors.cream,
-    fontSize: 16,
-    fontWeight: "700",
+  linkHit: {
+    justifyContent: "center",
+    minHeight: 44,
   },
   link: {
     color: colors.green,
     fontWeight: "700",
-    textAlign: "center",
+  },
+  linkMuted: {
+    color: colors.muted,
+    fontWeight: "700",
   },
 });

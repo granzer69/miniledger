@@ -9,13 +9,13 @@ type SummaryCardProps = {
 export function SummaryCard({ summary }: SummaryCardProps) {
   const overdue = (summary?.overduePaise ?? 0) > 0;
   return (
-    <View style={styles.card} accessibilityRole="summary">
+    <View accessibilityRole="summary" style={styles.card}>
       <Text style={styles.kicker}>Still out</Text>
       <Text style={styles.hero}>{summary?.outstanding ?? "—"}</Text>
-      <View style={styles.rows}>
+      <View style={styles.metrics}>
         <Metric label="Lent" value={summary?.totalLent ?? "—"} />
         <Metric label="Repaid" value={summary?.totalRepaid ?? "—"} />
-        <Metric label="Overdue" value={summary?.overdue ?? "—"} alert={overdue} />
+        <Metric alert={overdue} label="Overdue" value={summary?.overdue ?? "—"} />
       </View>
     </View>
   );
@@ -33,16 +33,17 @@ function Metric({ label, value, alert = false }: { label: string; value: string;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.greenDark,
-    borderRadius: 22,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 8,
+    borderRadius: 24,
     marginBottom: 22,
+    paddingBottom: 14,
+    paddingHorizontal: 18,
+    paddingTop: 20,
   },
   kicker: {
     color: "#D5E6DF",
-    fontSize: 13,
-    letterSpacing: 0.6,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.1,
     textTransform: "uppercase",
   },
   hero: {
@@ -50,27 +51,31 @@ const styles = StyleSheet.create({
     fontFamily: displayFont,
     fontSize: 40,
     lineHeight: 48,
-    marginTop: 4,
-    marginBottom: 14,
+    marginBottom: 16,
+    marginTop: 6,
   },
-  rows: {
+  metrics: {
+    borderTopColor: "rgba(246, 241, 231, 0.18)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(246, 241, 231, 0.16)",
+    flexDirection: "row",
+    gap: 8,
+    paddingTop: 14,
   },
   metric: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
+    flex: 1,
+    gap: 4,
   },
   metricLabel: {
     color: "#D5E6DF",
-    fontSize: 15,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
   },
   metricValue: {
     color: colors.cream,
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
   },
   alert: {
     color: "#F3C1BA",

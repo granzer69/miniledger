@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { colors } from "../theme";
+import { colors, inputStyle } from "../theme";
 
 type DateFieldProps = {
   value: string;
@@ -15,7 +15,7 @@ export function DateField({ value, onChange }: DateFieldProps) {
         autoCapitalize="none"
         onChangeText={onChange}
         placeholder="YYYY-MM-DD"
-        placeholderTextColor="#A39B90"
+        placeholderTextColor={colors.faint}
         style={styles.input}
         value={value}
       />
@@ -32,14 +32,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: "uppercase",
   },
-  input: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
-    color: colors.ink,
-    fontSize: 16,
-    minHeight: 52,
-    paddingHorizontal: 14,
-  },
+  input: inputStyle,
 });

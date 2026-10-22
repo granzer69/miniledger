@@ -15,7 +15,8 @@ import * as ImagePicker from "expo-image-picker";
 import { ApiError, createLoan, type ReceiptUpload } from "../lib/api";
 import { normalizeFriendName, parseIsoDate, shiftIsoDate, todayInKolkata } from "../lib/dates";
 import { rupeesToPaise, sanitizeAmount } from "../lib/money";
-import { colors, displayFont } from "../theme";
+import { colors, displayFont, inputStyle } from "../theme";
+import { Button } from "./Button";
 import { DateField } from "./DateField";
 
 type AddEntryModalProps = {
@@ -107,18 +108,18 @@ export function AddEntryModal({ visible, token, onClose, onCreated }: AddEntryMo
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Text style={styles.title}>New entry</Text>
-            <Pressable accessibilityRole="button" onPress={resetAndClose}>
+            <Pressable accessibilityRole="button" hitSlop={8} onPress={resetAndClose} style={styles.closeHit}>
               <Text style={styles.close}>Close</Text>
             </Pressable>
           </View>
-          <Text style={styles.intro}>Record money you lent. A past due date is allowed, so overdue loans can be added too.</Text>
+          <Text style={styles.intro}>Record money you lent. A past due date is allowed, so an overdue loan can be added too.</Text>
 
           <Field label="Friend's name">
             <TextInput
               accessibilityLabel="Friend's name"
               onChangeText={setFriendName}
               placeholder="Rahul"
-              placeholderTextColor="#A39B90"
+              placeholderTextColor={colors.faint}
               style={styles.input}
               value={friendName}
             />
@@ -129,7 +130,7 @@ export function AddEntryModal({ visible, token, onClose, onCreated }: AddEntryMo
               keyboardType="decimal-pad"
               onChangeText={setAmount}
               placeholder="1500.00"
-              placeholderTextColor="#A39B90"
+              placeholderTextColor={colors.faint}
               style={styles.input}
               value={amount}
             />
@@ -140,27 +141,23 @@ export function AddEntryModal({ visible, token, onClose, onCreated }: AddEntryMo
           {receipt ? (
             <View style={styles.previewRow}>
               <Image accessibilityLabel="Selected receipt" source={{ uri: receipt.uri }} style={styles.preview} />
-              <Pressable accessibilityRole="button" onPress={() => setReceipt(null)}>
-                <Text style={styles.remove}>Remove</Text>
-              </Pressable>
+              <Button label="Remove" onPress={() => setReceipt(null)} tone="secondary" />
             </View>
           ) : (
             <View style={styles.photoActions}>
-              <Pressable accessibilityRole="button" onPress={() => void choosePhoto("library")} style={styles.secondary}>
-                <Text style={styles.secondaryText}>Choose photo</Text>
-              </Pressable>
+              <Button label="Choose photo" onPress={() => void choosePhoto("library")} style={styles.photoButton} tone="secondary" />
               {Platform.OS === "web" ? null : (
-                <Pressable accessibilityRole="button" onPress={() => void choosePhoto("camera")} style={styles.secondary}>
-                  <Text style={styles.secondaryText}>Take photo</Text>
-                </Pressable>
+                <Button label="Take photo" onPress={() => void choosePhoto("camera")} style={styles.photoButton} tone="secondary" />
               )}
             </View>
           )}
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Pressable accessibilityRole="button" disabled={submitting} onPress={() => void submit()} style={styles.save}>
-            <Text style={styles.saveText}>{submitting ? "Saving…" : "Save entry"}</Text>
-          </Pressable>
+          {error ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              {error}
+            </Text>
+          ) : null}
+          <Button disabled={submitting} label={submitting ? "Saving…" : "Save entry"} onPress={() => void submit()} />
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
@@ -196,6 +193,10 @@ const styles = StyleSheet.create({
     fontFamily: displayFont,
     fontSize: 32,
   },
+  closeHit: {
+    justifyContent: "center",
+    minHeight: 44,
+  },
   close: {
     color: colors.green,
     fontSize: 16,
@@ -214,31 +215,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: "uppercase",
   },
-  input: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
-    color: colors.ink,
-    fontSize: 16,
-    minHeight: 52,
-    paddingHorizontal: 14,
-  },
+  input: inputStyle,
   photoActions: {
     flexDirection: "row",
     gap: 10,
   },
-  secondary: {
-    alignItems: "center",
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
+  photoButton: {
     flex: 1,
-    paddingVertical: 14,
-  },
-  secondaryText: {
-    color: colors.ink,
-    fontWeight: "700",
   },
   previewRow: {
     alignItems: "center",
@@ -250,26 +233,9 @@ const styles = StyleSheet.create({
     height: 84,
     width: 84,
   },
-  remove: {
-    color: colors.overdue,
-    fontWeight: "700",
-  },
   error: {
     color: colors.overdue,
     fontSize: 14,
     lineHeight: 20,
-  },
-  save: {
-    alignItems: "center",
-    backgroundColor: colors.green,
-    borderRadius: 14,
-    marginTop: 4,
-    minHeight: 52,
-    justifyContent: "center",
-  },
-  saveText: {
-    color: colors.cream,
-    fontSize: 16,
-    fontWeight: "700",
   },
 });
